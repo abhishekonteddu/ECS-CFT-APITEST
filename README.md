@@ -16,6 +16,7 @@ AWS CloudFormation + ECS Tasks cron-like schedule  + Cloudwtach Logging to test 
 
 ## CloudFormation Template
 
+link of the template file: https://github.com/abhishekonteddu/ECS-CFT-APITEST/blob/main/cloudformationtemplate.yml
 
 The CloudFormation template includes the following resources:
 
