@@ -38,4 +38,21 @@ Go the Cloudformation and upload the cloudformation template and select the subn
 4) check the task in ecs is every one minute new container is running or not
 
 
+## Screenshots 
+
+![alt text](https://github.com/abhishekonteddu/ECS-CFT-APITEST/blob/cft/Images/CFT_Parameters.PNG?raw=true)
+
+![alt text](https://github.com/abhishekonteddu/ECS-CFT-APITEST/blob/cft/Images/CFT_Image_2.PNG?raw=true)
+
+
+![alt text](https://github.com/abhishekonteddu/ECS-CFT-APITEST/blob/cft/Images/ECS_Cron_job.PNG?raw=true)
+
+
+![alt text](https://github.com/abhishekonteddu/ECS-CFT-APITEST/blob/cft/Images/ECS_Scheduled_task.PNG?raw=true)
+
+
+![alt text](https://github.com/abhishekonteddu/ECS-CFT-APITEST/blob/cft/Images/Cloud_watch_1.PNG?raw=true)
+
+
+
 
