@@ -40,18 +40,18 @@ Go the Cloudformation and upload the cloudformation template and select the subn
 
 ## Screenshots 
 
-![alt text](https://github.com/abhishekonteddu/ECS-CFT-APITEST/blob/cft/Images/CFT_Parameters.PNG?raw=true)
+![alt text](https://github.com/abhishekonteddu/ECS-CFT-APITEST/blob/main/Images/CFT_Parameters.PNG?raw=true)
 
-![alt text](https://github.com/abhishekonteddu/ECS-CFT-APITEST/blob/cft/Images/CFT_Image_2.PNG?raw=true)
-
-
-![alt text](https://github.com/abhishekonteddu/ECS-CFT-APITEST/blob/cft/Images/ECS_Cron_job.PNG?raw=true)
+![alt text](https://github.com/abhishekonteddu/ECS-CFT-APITEST/blob/main/Images/CFT_Image_2.PNG?raw=true)
 
 
-![alt text](https://github.com/abhishekonteddu/ECS-CFT-APITEST/blob/cft/Images/ECS_Scheduled_task.PNG?raw=true)
+![alt text](https://github.com/abhishekonteddu/ECS-CFT-APITEST/blob/main/Images/ECS_Cron_job.PNG?raw=true)
 
 
-![alt text](https://github.com/abhishekonteddu/ECS-CFT-APITEST/blob/cft/Images/Cloud_watch_1.PNG?raw=true)
+![alt text](https://github.com/abhishekonteddu/ECS-CFT-APITEST/blob/main/Images/ECS_Scheduled_task.PNG?raw=true)
+
+
+![alt text](https://github.com/abhishekonteddu/ECS-CFT-APITEST/blob/main/Images/Cloud_watch_1.PNG?raw=true)
 
 
 
