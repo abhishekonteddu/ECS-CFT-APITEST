@@ -1,55 +1,97 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: My ECS stack.
 Parameters:
-  Stage:
+  pStage:
     Description: Stage type
     Type: String
     Default: dev
     AllowedValues:
       - dev
       - prod
-  ContainerMemory:
+  pContainerMemory:
     Description: Memory for the fargate Task
     Type: Number
     Default: 2048
-  ContainerCpu:
+  pContainerCpu:
     Description: Cpu for the fargate task
     Type: Number
     Default: 1024
-  VPCID:
+  pVPCID:
     Description: Id of and existing Development VPC
     Type: "AWS::EC2::VPC::Id"
     ConstraintDescription: Must be a valid VPC.
-  SubnetId1:
+  pSubnetId1:
     Description: "Private subnet for confidential apps "
     Type: "AWS::EC2::Subnet::Id"
     MinLength: "1"
     MaxLength: "255"
     ConstraintDescription: Must be a valid Private Subnet.
-  SubnetId2:
+  pSubnetId2:
     Description: "Private subnet for confidential apps "
     Type: "AWS::EC2::Subnet::Id"
     MinLength: "1"
     MaxLength: "255"
     ConstraintDescription: Must be a valid Private Subnet.
-  SubnetId3:
+  pSubnetId3:
     Description: "Private subnet for confidential apps "
     Type: "AWS::EC2::Subnet::Id"
     MinLength: "1"
     MaxLength: "255"
-  CloudWatchLogRetain:
-    Description: Code Build Timeout in Minutes
+  pCloudWatchLogRetain:
+    Description: Cloudwatch logs regain in days
     Type: Number
-    Default: 90
+    Default: 7
     MinValue: 1
     MaxValue: 3653
 
-
+Metadata:
+  # The AWS::CloudFormation::Interface key contains metadata that specifies how AWS CloudFormation presents the
+  # parameters and outputs in the AWS Management Console. The key is used to define the parameter grouping and
+  # parameter labels for the parameters in this template.
+  AWS::CloudFormation::Interface:
+    ParameterLabels:
+          pStage:
+            default: Environment
+          pContainerMemory:
+            default: Container Memory
+          pContainerCpu:
+            default: Container CPU
+          pVPCID:
+            default: VPC ID
+          pSubnetId1:
+            default: Subnet 1
+          pSubnetId2:
+            default: Subnet 2
+          pSubnetId3:
+            default: Subnet 3
+          pCloudWatchLogRetain:
+            default: cloudwatch logs retain in days  
+    ParameterGroups:
+      - Label:
+          # The default key specifies the label that is displayed for the parameter group in the AWS Management Console.
+          default: "Fargate Task Configuration"
+        Parameters:
+          - pStage:
+              Label: "Environment"
+          - pContainerMemory:
+              Label: "Container Memory"
+          - Container CPU:
+              Label: "Container CPU"
+          - pVPCID:
+              Label: "VPC ID"
+          - pSubnetId1:
+              Label: "Subent 1"
+          - pSubnetId2:
+              Label: "Subent 2"
+          - pSubnetId3:
+              Label: "Subent 3"
+          - pCloudWatchLogRetain:
+              Label: "cloudwatch logs retain in days"
 Resources:
   MyServiceECSCluster:
     Type: "AWS::ECS::Cluster"
     Properties:
-      ClusterName: !Sub My-service-${Stage}-ecs-cluster
+      ClusterName: !Sub My-service-${pStage}-ecs-cluster
       ClusterSettings:
         - Name: containerInsights
           Value: enabled
@@ -57,8 +99,10 @@ Resources:
   MyServiceECSRole:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: !Sub My-service-${Stage}-MyServiceECSRole
-      #PermissionsBoundary: !Sub "arn:aws:iam::${AWS::AccountId}:policy/PermissionBoundary-DevOps"
+      RoleName: !Sub My-service-${pStage}-MyServiceECSRole
+      
+      # PermissionsBoundary: !Sub "arn:aws:iam::${AWS::AccountId}:policy/PermissionBoundary-DevOps"
+      
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -69,7 +113,7 @@ Resources:
             Action:
               - "sts:AssumeRole"
       Policies:
-        - PolicyName: !Sub My-service-${Stage}-MyServiceECSPolicy
+        - PolicyName: !Sub My-service-${pStage}-MyServiceECSPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -84,8 +128,10 @@ Resources:
   MyServiceECSTaskExecutionRole:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: !Sub "MyService-${Stage}-Task-ExecutionRole"
-      #PermissionsBoundary: !Sub "arn:aws:iam::${AWS::AccountId}:policy/PermissionBoundary-DevOps"
+      RoleName: !Sub "MyService-${pStage}-Task-ExecutionRole"
+
+      # PermissionsBoundary: !Sub "arn:aws:iam::${AWS::AccountId}:policy/PermissionBoundary-DevOps"
+      
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -96,7 +142,7 @@ Resources:
             Action:
               - "sts:AssumeRole"
       Policies:
-        - PolicyName: !Sub My-service-${Stage}-MyServiceTaskExecutionPolicy
+        - PolicyName: !Sub My-service-${pStage}-MyServiceTaskExecutionPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -116,8 +162,10 @@ Resources:
   MyServiceCloudWatchEventRole:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: !Sub "My-${Stage}-Service-CloudWatchEventRole"
-      #PermissionsBoundary: !Sub "arn:aws:iam::${AWS::AccountId}:policy/PermissionBoundary-DevOps"
+      RoleName: !Sub "My-${pStage}-Service-CloudWatchEventRole"
+
+      # PermissionsBoundary: !Sub "arn:aws:iam::${AWS::AccountId}:policy/PermissionBoundary-DevOps"
+      
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -128,7 +176,7 @@ Resources:
             Action:
               - "sts:AssumeRole"
       Policies:
-        - PolicyName: !Sub My-service-${Stage}-MyServiceECSTaskExecutionPolicy
+        - PolicyName: !Sub My-service-${pStage}-MyServiceECSTaskExecutionPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -136,7 +184,7 @@ Resources:
                 Action:
                   - ecs:RunTask
                 Resource: !Ref MyServiceEcsTaskDefinition
-        - PolicyName: !Sub My-service-${Stage}-MyServiceECSTaskExecutionIAMPolicy
+        - PolicyName: !Sub My-service-${pStage}-MyServiceECSTaskExecutionIAMPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -151,14 +199,14 @@ Resources:
   MyServiceEcsLogsGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub My-service-${Stage}-task-LogsGroup
-      RetentionInDays: !Ref CloudWatchLogRetain
+      LogGroupName: !Sub My-service-${pStage}-task-LogsGroup
+      RetentionInDays: !Ref pCloudWatchLogRetain
 
   MyServiceFargateSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: ECS Fargate Security Group
-      VpcId: !Ref VPCID
+      VpcId: !Ref pVPCID
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
@@ -168,12 +216,12 @@ Resources:
   MyServiceEcsTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
-      Cpu: !Ref ContainerCpu
-      Memory: !Ref ContainerMemory
+      Cpu: !Ref pContainerCpu
+      Memory: !Ref pContainerMemory
       ExecutionRoleArn: !GetAtt
         - MyServiceECSTaskExecutionRole
         - Arn
-      Family: !Sub My-service-${Stage}-task-definition
+      Family: !Sub My-service-${pStage}-task-definition
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
@@ -186,18 +234,17 @@ Resources:
               awslogs-group: !Ref MyServiceEcsLogsGroup
               awslogs-region: !Ref "AWS::Region"
               awslogs-stream-prefix: ecs
-          Name: !Sub My-service-${Stage}-MyServiceTaskContainer
-          Memory: !Ref ContainerMemory
-          Cpu: !Ref ContainerCpu
+          Name: !Sub My-service-${pStage}-MyServiceTaskContainer    
+          Memory: !Ref pContainerMemory
+          Cpu: !Ref pContainerCpu
           PortMappings:
             - { ContainerPort: 80 }
-
 
   MyServiceScheduleRule:
     Type: AWS::Events::Rule
     Properties:
       Description: "Schedule rule for My Service"
-      Name: !Sub My-service-task-schedule-rule-${Stage}
+      Name: !Sub My-service-task-schedule-rule-${pStage}
       State: ENABLED
       ScheduleExpression: cron(0/1 * ? * * *)
       Targets:
@@ -213,12 +260,10 @@ Resources:
                 SecurityGroups:
                   - !Ref MyServiceFargateSecurityGroup
                 Subnets:
-                  - !Ref SubnetId1
-                  - !Ref SubnetId2
-                  - !Ref SubnetId3
-
-
+                  - !Ref pSubnetId1
+                  - !Ref pSubnetId2
+                  - !Ref pSubnetId3
 Outputs:
   MyServiceEcsLogsGroup:
     Description: The ID of the log
-    Value: !Sub My-service-${Stage}-task-LogsGroup
+    Value: !Sub My-service-${pStage}-task-LogsGroup
