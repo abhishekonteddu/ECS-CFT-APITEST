@@ -1,5 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: My ECS stack.
+# Parameters 
 Parameters:
   pStage:
     Description: Stage type
@@ -69,26 +70,47 @@ Metadata:
     ParameterGroups:
       - Label:
           # The default key specifies the label that is displayed for the parameter group in the AWS Management Console.
+          
           default: "Fargate Task Configuration"
         Parameters:
+          # The below parameters included in the "Fargate Task Configuration" group, and it is given the
+          # label "Environment", This label is displayed next to the parameter in the AWS Management Console.
           - pStage:
               Label: "Environment"
+          
+          # label "Container memory"
           - pContainerMemory:
               Label: "Container Memory"
+          
+          # label "Container CPU" 
           - Container CPU:
               Label: "Container CPU"
+          
+          # label "Container CPU" 
           - pVPCID:
               Label: "VPC ID"
+          
+          # label "Private subnet 1" 
           - pSubnetId1:
               Label: "Subent 1"
+
+          # label "Private subnet 2" 
           - pSubnetId2:
               Label: "Subent 2"
+
+          # label "Private subnet 3" 
           - pSubnetId3:
               Label: "Subent 3"
+
+          # label "cloudwatch logs retention in days" 
           - pCloudWatchLogRetain:
               Label: "cloudwatch logs retain in days"
+
+# Define the resources that will be created
 Resources:
-  MyServiceECSCluster:
+
+  # ECS cluster 
+  myServiceECSCluster:
     Type: "AWS::ECS::Cluster"
     Properties:
       ClusterName: !Sub My-service-${pStage}-ecs-cluster
@@ -96,13 +118,11 @@ Resources:
         - Name: containerInsights
           Value: enabled
 
-  MyServiceECSRole:
+  # Define the ECS Service Role 
+  myServiceECSRole:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: !Sub My-service-${pStage}-MyServiceECSRole
-      
-      # PermissionsBoundary: !Sub "arn:aws:iam::${AWS::AccountId}:policy/PermissionBoundary-DevOps"
-      
+      RoleName: !Sub My-service-${pStage}-myServiceECSRole
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -125,13 +145,11 @@ Resources:
                 Resource: "*"
       Path: "/"
 
-  MyServiceECSTaskExecutionRole:
+  # Define the IAM role for the task execution
+  myServiceECSTaskExecutionRole:
     Type: "AWS::IAM::Role"
     Properties:
       RoleName: !Sub "MyService-${pStage}-Task-ExecutionRole"
-
-      # PermissionsBoundary: !Sub "arn:aws:iam::${AWS::AccountId}:policy/PermissionBoundary-DevOps"
-      
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -159,13 +177,10 @@ Resources:
                 Resource: "*"
       Path: "/"
 
-  MyServiceCloudWatchEventRole:
+  myServiceCloudWatchEventRole:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: !Sub "My-${pStage}-Service-CloudWatchEventRole"
-
-      # PermissionsBoundary: !Sub "arn:aws:iam::${AWS::AccountId}:policy/PermissionBoundary-DevOps"
-      
+      RoleName: !Sub "my-${pStage}-Service-CloudWatchEventRole"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -176,15 +191,15 @@ Resources:
             Action:
               - "sts:AssumeRole"
       Policies:
-        - PolicyName: !Sub My-service-${pStage}-MyServiceECSTaskExecutionPolicy
+        - PolicyName: !Sub my-service-${pStage}-MyServiceECSTaskExecutionPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
                   - ecs:RunTask
-                Resource: !Ref MyServiceEcsTaskDefinition
-        - PolicyName: !Sub My-service-${pStage}-MyServiceECSTaskExecutionIAMPolicy
+                Resource: !Ref myServiceEcsTaskDefinition
+        - PolicyName: !Sub my-service-${pStage}-MyServiceECSTaskExecutionIAMPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -194,15 +209,17 @@ Resources:
                 Resource: "*"
       Path: "/"
     DependsOn:
-      - MyServiceEcsTaskDefinition
-
-  MyServiceEcsLogsGroup:
+      - myServiceEcsTaskDefinition
+  
+  # Define the CloudWatch Log Group for the Fargate task's stdout
+  myServiceEcsLogsGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub My-service-${pStage}-task-LogsGroup
+      LogGroupName: !Sub my-service-${pStage}-task-LogsGroup
       RetentionInDays: !Ref pCloudWatchLogRetain
 
-  MyServiceFargateSecurityGroup:
+  # Define the Security group for forgate containers 
+  myServiceFargateSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: ECS Fargate Security Group
@@ -213,57 +230,63 @@ Resources:
           ToPort: 80
           CidrIp: 0.0.0.0/0
 
-  MyServiceEcsTaskDefinition:
+  # Define the taskdefinition for the forgate conatiners
+  myServiceEcsTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
       Cpu: !Ref pContainerCpu
       Memory: !Ref pContainerMemory
       ExecutionRoleArn: !GetAtt
-        - MyServiceECSTaskExecutionRole
+        - myServiceECSTaskExecutionRole
         - Arn
-      Family: !Sub My-service-${pStage}-task-definition
+      Family: !Sub my-service-${pStage}-task-definition
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
-      TaskRoleArn: !GetAtt MyServiceECSRole.Arn
+      TaskRoleArn: !GetAtt myServiceECSRole.Arn
       ContainerDefinitions:
+
+         # docker custome image which will pull from docker hub 
         - Image: !Sub "abhishekonteddu/ecsapitest:latest"
           LogConfiguration:
             LogDriver: awslogs
             Options:
-              awslogs-group: !Ref MyServiceEcsLogsGroup
+              awslogs-group: !Ref myServiceEcsLogsGroup
               awslogs-region: !Ref "AWS::Region"
               awslogs-stream-prefix: ecs
-          Name: !Sub My-service-${pStage}-MyServiceTaskContainer    
+          Name: !Sub my-service-${pStage}-MyServiceTaskContainer    
           Memory: !Ref pContainerMemory
           Cpu: !Ref pContainerCpu
           PortMappings:
             - { ContainerPort: 80 }
 
-  MyServiceScheduleRule:
+  # Define the scheduled task that will run the Fargate task once per minute
+  myServiceScheduleRule:
     Type: AWS::Events::Rule
     Properties:
       Description: "Schedule rule for My Service"
-      Name: !Sub My-service-task-schedule-rule-${pStage}
+      Name: !Sub my-service-task-schedule-rule-${pStage}
       State: ENABLED
+      # Run once per minute
       ScheduleExpression: cron(0/1 * ? * * *)
       Targets:
-        - Arn: !GetAtt MyServiceECSCluster.Arn
+        - Arn: !GetAtt myServiceECSCluster.Arn
           Id: ScheduledTask
-          RoleArn: !GetAtt MyServiceCloudWatchEventRole.Arn
+          RoleArn: !GetAtt myServiceCloudWatchEventRole.Arn
           EcsParameters:
-            TaskDefinitionArn: !Ref MyServiceEcsTaskDefinition
+            TaskDefinitionArn: !Ref myServiceEcsTaskDefinition
             LaunchType: FARGATE
             NetworkConfiguration:
               AwsVpcConfiguration:
                 AssignPublicIp: ENABLED
                 SecurityGroups:
-                  - !Ref MyServiceFargateSecurityGroup
+                  - !Ref myServiceFargateSecurityGroup
                 Subnets:
                   - !Ref pSubnetId1
                   - !Ref pSubnetId2
                   - !Ref pSubnetId3
 Outputs:
-  MyServiceEcsLogsGroup:
+  # Output logs for cloudwatch log group 
+  myServiceEcsLogsGroup:
     Description: The ID of the log
     Value: !Sub My-service-${pStage}-task-LogsGroup
